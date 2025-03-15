@@ -1,3 +1,3 @@
-# earnix web cli
+# yarn-monorepo-cli
 
 Raycast extention
