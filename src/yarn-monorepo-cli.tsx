@@ -1,4 +1,5 @@
 import { ActionPanel, List, Action, Form, LocalStorage, showToast, Toast, Clipboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
@@ -42,10 +43,9 @@ export default function Command() {
             path: path.dirname(pkgPath),
           };
         });
-
         setPackages(packages);
       } catch (error) {
-        showToast(Toast.Style.Failure, "Error reading monorepo structure");
+        showFailureToast(error, { title: "Error reading monorepo structure" });
       }
     })();
   }, [rootPath]);
@@ -73,18 +73,16 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {packages.map((pkg) => (
-        <>
-          <List.Item
-            key={pkg.name}
-            icon="📦"
-            title={pkg.name}
-            actions={
-              <ActionPanel>
-                <Action.Push title="Select Package" target={<ScriptList package={pkg} />} />
-              </ActionPanel>
-            }
-          />
-        </>
+        <List.Item
+          key={pkg.name}
+          icon="📦"
+          title={pkg.name}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Select Package" target={<ScriptList package={pkg} />} />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );
@@ -104,7 +102,7 @@ function ScriptList({ package: pkg }: { package: PackageInfo }) {
               <Action
                 title="Paste Command"
                 onAction={async () => {
-                  const command = `yarn workspace ${pkg.name} ${name}`;
+                  const command = `yarn workspace "${pkg.name}" "${name}"`;
                   await Clipboard.paste(command);
                   await showToast({
                     style: Toast.Style.Success,
